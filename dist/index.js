@@ -1,7 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChartJSNodeCanvas = void 0;
+exports.ChartJSNodeCanvas = exports.BackgroundColourPlugin = void 0;
 const lib_1 = require("skia-canvas/lib");
+class BackgroundColourPlugin {
+    constructor(_width, _height, _fillStyle) {
+        this._width = _width;
+        this._height = _height;
+        this._fillStyle = _fillStyle;
+        this.id = 'chartjs-plugin-chartjs-node-canvas-background-colour';
+    }
+    beforeDraw(chart) {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.fillStyle = this._fillStyle;
+        ctx.fillRect(0, 0, this._width, this._height);
+        ctx.restore();
+    }
+}
+exports.BackgroundColourPlugin = BackgroundColourPlugin;
 class ChartJSNodeCanvas {
     /**
      * Create a new instance of CanvasRenderService.
@@ -62,16 +78,12 @@ class ChartJSNodeCanvas {
         if (options.chartCallback) {
             options.chartCallback(chartJs);
         }
+        chartJs.register(new BackgroundColourPlugin(options.width, options.height, '#fff'));
         delete require.cache[require.resolve('chart.js')];
         return chartJs;
     }
     renderChart(configuration) {
         const canvas = new lib_1.Canvas(this._width, this._height);
-        const ctx = canvas.getContext('2d');
-        ctx.save();
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
         canvas.style = canvas.style || {};
         // Disable animation (otherwise charts will throw exceptions)
         configuration.options = configuration.options || {};

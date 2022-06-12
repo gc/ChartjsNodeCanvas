@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { Chart as ChartJS, ChartConfiguration, ChartComponentLike } from 'chart.js';
+import { Chart as ChartJS, ChartConfiguration, ChartComponentLike, Plugin } from 'chart.js';
 import { Canvas as SkiaCanvas, FontLibrary, Image } from 'skia-canvas/lib';
 
 export type ChartJSNodeCanvasPlugins = {
@@ -25,7 +25,24 @@ export type CanvasType = 'pdf' | 'svg';
 export type MimeType = 'image/png' | 'image/jpeg';
 
 
+export class BackgroundColourPlugin implements Plugin {
+	public readonly id: string = 'chartjs-plugin-chartjs-node-canvas-background-colour';
 
+	public constructor(
+		private readonly _width: number,
+		private readonly _height: number,
+		private readonly _fillStyle: string
+	) { }
+
+	public beforeDraw(chart: ChartJS): boolean | void {
+
+		const ctx = chart.ctx;
+		ctx.save();
+		ctx.fillStyle = this._fillStyle;
+		ctx.fillRect(0, 0, this._width, this._height);
+		ctx.restore();
+	}
+}
 // https://github.com/Automattic/node-canvas#non-standard-apis
 type Canvas	= HTMLCanvasElement & {
 	toBuffer(callback: (err: Error|null, result: Buffer) => void, mimeType?: string, config?: any): void;
@@ -140,6 +157,7 @@ export class ChartJSNodeCanvas {
 		if (options.chartCallback) {
 			options.chartCallback(chartJs);
 		}
+		chartJs.register(new BackgroundColourPlugin(options.width, options.height, '#fff'));
 
 		delete require.cache[require.resolve('chart.js')];
 
@@ -148,11 +166,6 @@ export class ChartJSNodeCanvas {
 
 	private renderChart(configuration: ChartConfiguration): ChartJS {
 		const canvas = new SkiaCanvas(this._width, this._height);
-		const ctx = canvas.getContext('2d');
-			ctx.save();
-		ctx.fillStyle = '#fff'
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		ctx.restore();
 		(canvas as any).style = (canvas as any).style || {};
 		// Disable animation (otherwise charts will throw exceptions)
 		configuration.options = configuration.options || {};
