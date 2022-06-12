@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 import { Chart as ChartJS, ChartConfiguration, ChartComponentLike } from 'chart.js';
-import { createCanvas, registerFont, Image } from 'canvas';
-import { freshRequire } from './freshRequire';
+import { Canvas as SkiaCanvas, FontLibrary, Image } from 'skia-canvas/lib';
 import { BackgroundColourPlugin } from './backgroundColourPlugin';
 
 export type ChartJSNodeCanvasPlugins = {
@@ -68,8 +67,6 @@ export class ChartJSNodeCanvas {
 	private readonly _width: number;
 	private readonly _height: number;
 	private readonly _chartJs: typeof ChartJS;
-	private readonly _createCanvas: typeof createCanvas;
-	private readonly _registerFont: typeof registerFont;
 	private readonly _image: typeof Image;
 	private readonly _type?: CanvasType;
 
@@ -92,10 +89,7 @@ export class ChartJSNodeCanvas {
 
 		this._width = options.width;
 		this._height = options.height;
-		const canvas = freshRequire('canvas');
-		this._createCanvas = canvas.createCanvas;
-		this._registerFont = canvas.registerFont;
-		this._image = canvas.Image;
+		this._image = Image;
 		this._type = options.type && options.type.toLowerCase() as CanvasType;
 		this._chartJs = this.initialize(options);
 	}
@@ -224,44 +218,12 @@ export class ChartJSNodeCanvas {
 	 * registerFont('comicsans.ttf', { family: 'Comic Sans' });
 	 */
 	public registerFont(path: string, options: { readonly family: string, readonly weight?: string, readonly style?: string }): void {
-
-		this._registerFont(path, options);
+		FontLibrary.use(options.family, [path])
 	}
 
 	private initialize(options: ChartJSNodeCanvasOptions): typeof ChartJS {
 
 		const chartJs: typeof ChartJS = require('chart.js');
-
-		if (options.plugins?.requireChartJSLegacy) {
-			for (const plugin of options.plugins.requireChartJSLegacy) {
-				require(plugin);
-				delete require.cache[require.resolve(plugin)];
-			}
-		}
-
-		if (options.plugins?.globalVariableLegacy) {
-			(global as any).Chart = chartJs;
-			for (const plugin of options.plugins.globalVariableLegacy) {
-				freshRequire(plugin);
-			}
-			delete (global as any).Chart;
-		}
-
-		if (options.plugins?.modern) {
-			for (const plugin of options.plugins.modern) {
-				if (typeof plugin === 'string') {
-					chartJs.register(freshRequire(plugin));
-				} else {
-					chartJs.register(plugin);
-				}
-			}
-		}
-
-		if (options.plugins?.requireLegacy) {
-			for (const plugin of options.plugins.requireLegacy) {
-				chartJs.register(freshRequire(plugin));
-			}
-		}
 
 		if (options.chartCallback) {
 			options.chartCallback(chartJs);
@@ -270,15 +232,13 @@ export class ChartJSNodeCanvas {
 		if (options.backgroundColour) {
 			chartJs.register(new BackgroundColourPlugin(options.width, options.height, options.backgroundColour));
 		}
-
 		delete require.cache[require.resolve('chart.js')];
 
 		return chartJs;
 	}
 
 	private renderChart(configuration: ChartConfiguration): ChartJS {
-
-		const canvas = this._createCanvas(this._width, this._height, this._type);
+		const canvas = new SkiaCanvas(this._width, this._height);
 		(canvas as any).style = (canvas as any).style || {};
 		// Disable animation (otherwise charts will throw exceptions)
 		configuration.options = configuration.options || {};
@@ -286,7 +246,7 @@ export class ChartJSNodeCanvas {
 		configuration.options.animation = false as any;
 		const context = canvas.getContext('2d');
 		(global as any).Image = this._image; // Some plugins use this API
-		const chart = new this._chartJs(context, configuration);
+		const chart = new this._chartJs(context as any, configuration);
 		delete (global as any).Image;
 		return chart;
 	}

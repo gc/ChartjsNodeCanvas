@@ -1,4 +1,5 @@
 /// <reference types="node" />
+/// <reference types="node" />
 import { Readable } from 'stream';
 import { Chart as ChartJS, ChartConfiguration, ChartComponentLike } from 'chart.js';
 export declare type ChartJSNodeCanvasPlugins = {
@@ -52,8 +53,6 @@ export declare class ChartJSNodeCanvas {
     private readonly _width;
     private readonly _height;
     private readonly _chartJs;
-    private readonly _createCanvas;
-    private readonly _registerFont;
     private readonly _image;
     private readonly _type?;
     /**
