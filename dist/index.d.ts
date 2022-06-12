@@ -1,6 +1,4 @@
 /// <reference types="node" />
-/// <reference types="node" />
-import { Readable } from 'stream';
 import { Chart as ChartJS, ChartConfiguration, ChartComponentLike } from 'chart.js';
 export declare type ChartJSNodeCanvasPlugins = {
     /**
@@ -84,7 +82,7 @@ export declare class ChartJSNodeCanvas {
      * @param configuration The Chart JS configuration for the chart to render.
      * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support) or `raw` (unencoded ARGB32 data in native-endian byte order, top-to-bottom). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
      */
-    renderToBuffer(configuration: ChartConfiguration, mimeType?: MimeType): Promise<Buffer>;
+    renderToBuffer(configuration: ChartConfiguration): Promise<Buffer>;
     /**
      * Render to a buffer synchronously.
      * @see https://github.com/Automattic/node-canvas#canvastobuffer
@@ -92,15 +90,7 @@ export declare class ChartJSNodeCanvas {
      * @param configuration The Chart JS configuration for the chart to render.
      * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support), `raw` (unencoded ARGB32 data in native-endian byte order, top-to-bottom), `application/pdf` (for PDF canvases) and image/svg+xml (for SVG canvases). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
      */
-    renderToBufferSync(configuration: ChartConfiguration, mimeType?: MimeType | 'application/pdf' | 'image/svg+xml'): Buffer;
-    /**
-     * Render to a stream.
-     * @see https://github.com/Automattic/node-canvas#canvascreatepngstream
-     *
-     * @param configuration The Chart JS configuration for the chart to render.
-     * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support), `application/pdf` (for PDF canvases) and image/svg+xml (for SVG canvases). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
-     */
-    renderToStream(configuration: ChartConfiguration, mimeType?: MimeType | 'application/pdf'): Readable;
+    renderToBufferSync(configuration: ChartConfiguration): Buffer;
     /**
      * Use to register the font with Canvas to use a font file that is not installed as a system font, this must be done before the Canvas is created.
      *

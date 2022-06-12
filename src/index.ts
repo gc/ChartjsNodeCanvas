@@ -144,22 +144,10 @@ export class ChartJSNodeCanvas {
 	 * @param configuration The Chart JS configuration for the chart to render.
 	 * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support) or `raw` (unencoded ARGB32 data in native-endian byte order, top-to-bottom). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
 	 */
-	public renderToBuffer(configuration: ChartConfiguration, mimeType: MimeType = 'image/png'): Promise<Buffer> {
+	public renderToBuffer(configuration: ChartConfiguration): Promise<Buffer> {
 
 		const chart = this.renderChart(configuration);
-		return new Promise<Buffer>((resolve, reject) => {
-			if (!chart.canvas) {
-				throw new Error('Canvas is null');
-			}
-			const canvas = chart.canvas as Canvas;
-			canvas.toBuffer((error: Error | null, buffer: Buffer) => {
-				chart.destroy();
-				if (error) {
-					return reject(error);
-				}
-				return resolve(buffer);
-			}, mimeType);
-		});
+		return (chart.canvas as any as SkiaCanvas).toBuffer('png')
 	}
 
 	/**
@@ -169,43 +157,10 @@ export class ChartJSNodeCanvas {
 	 * @param configuration The Chart JS configuration for the chart to render.
 	 * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support), `raw` (unencoded ARGB32 data in native-endian byte order, top-to-bottom), `application/pdf` (for PDF canvases) and image/svg+xml (for SVG canvases). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
 	 */
-	public renderToBufferSync(configuration: ChartConfiguration, mimeType: MimeType | 'application/pdf' | 'image/svg+xml' = 'image/png'): Buffer {
+	public renderToBufferSync(configuration: ChartConfiguration): Buffer {
 
 		const chart = this.renderChart(configuration);
-		if (!chart.canvas) {
-			throw new Error('Canvas is null');
-		}
-		const canvas = chart.canvas as Canvas;
-		const buffer =  canvas.toBuffer(mimeType);
-		chart.destroy();
-		return buffer;
-	}
-
-	/**
-	 * Render to a stream.
-	 * @see https://github.com/Automattic/node-canvas#canvascreatepngstream
-	 *
-	 * @param configuration The Chart JS configuration for the chart to render.
-	 * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support), `application/pdf` (for PDF canvases) and image/svg+xml (for SVG canvases). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
-	 */
-	public renderToStream(configuration: ChartConfiguration, mimeType: MimeType | 'application/pdf' = 'image/png'): Readable {
-
-		const chart = this.renderChart(configuration);
-		if (!chart.canvas) {
-			throw new Error('Canvas is null');
-		}
-		const canvas = chart.canvas as Canvas;
-		setImmediate(() => chart.destroy());
-		switch (mimeType) {
-			case 'image/png':
-				return canvas.createPNGStream();
-			case 'image/jpeg':
-				return canvas.createJPEGStream();
-			case 'application/pdf':
-				return canvas.createPDFStream();
-			default:
-				throw new Error(`Un-handled mimeType: ${mimeType}`);
-		}
+		return (chart.canvas as any as SkiaCanvas).toBufferSync('png')
 	}
 
 	/**
