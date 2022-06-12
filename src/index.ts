@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 import { Chart as ChartJS, ChartConfiguration, ChartComponentLike } from 'chart.js';
 import { Canvas as SkiaCanvas, FontLibrary, Image } from 'skia-canvas/lib';
-import { BackgroundColourPlugin } from './backgroundColourPlugin';
 
 export type ChartJSNodeCanvasPlugins = {
 	/**
@@ -229,9 +228,6 @@ export class ChartJSNodeCanvas {
 			options.chartCallback(chartJs);
 		}
 
-		if (options.backgroundColour) {
-			chartJs.register(new BackgroundColourPlugin(options.width, options.height, options.backgroundColour));
-		}
 		delete require.cache[require.resolve('chart.js')];
 
 		return chartJs;

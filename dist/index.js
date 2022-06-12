@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChartJSNodeCanvas = void 0;
 const lib_1 = require("skia-canvas/lib");
-const backgroundColourPlugin_1 = require("./backgroundColourPlugin");
 class ChartJSNodeCanvas {
     /**
      * Create a new instance of CanvasRenderService.
@@ -145,9 +144,6 @@ class ChartJSNodeCanvas {
         const chartJs = require('chart.js');
         if (options.chartCallback) {
             options.chartCallback(chartJs);
-        }
-        if (options.backgroundColour) {
-            chartJs.register(new backgroundColourPlugin_1.BackgroundColourPlugin(options.width, options.height, options.backgroundColour));
         }
         delete require.cache[require.resolve('chart.js')];
         return chartJs;
