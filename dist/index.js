@@ -25,46 +25,6 @@ class ChartJSNodeCanvas {
         this._chartJs = this.initialize(options);
     }
     /**
-     * Render to a data url.
-     * @see https://github.com/Automattic/node-canvas#canvastodataurl
-     *
-     * @param configuration The Chart JS configuration for the chart to render.
-     * @param mimeType The image format, `image/png` or `image/jpeg`.
-     */
-    renderToDataURL(configuration, mimeType = 'image/png') {
-        const chart = this.renderChart(configuration);
-        return new Promise((resolve, reject) => {
-            if (!chart.canvas) {
-                return reject(new Error('Canvas is null'));
-            }
-            const canvas = chart.canvas;
-            canvas.toDataURL(mimeType, (error, png) => {
-                chart.destroy();
-                if (error) {
-                    return reject(error);
-                }
-                return resolve(png);
-            });
-        });
-    }
-    /**
-     * Render to a data url synchronously.
-     * @see https://github.com/Automattic/node-canvas#canvastodataurl
-     *
-     * @param configuration The Chart JS configuration for the chart to render.
-     * @param mimeType The image format, `image/png` or `image/jpeg`.
-     */
-    renderToDataURLSync(configuration, mimeType = 'image/png') {
-        const chart = this.renderChart(configuration);
-        if (!chart.canvas) {
-            throw new Error('Canvas is null');
-        }
-        const canvas = chart.canvas;
-        const dataUrl = canvas.toDataURL(mimeType);
-        chart.destroy();
-        return dataUrl;
-    }
-    /**
      * Render to a buffer.
      * @see https://github.com/Automattic/node-canvas#canvastobuffer
      *
@@ -107,6 +67,11 @@ class ChartJSNodeCanvas {
     }
     renderChart(configuration) {
         const canvas = new lib_1.Canvas(this._width, this._height);
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
         canvas.style = canvas.style || {};
         // Disable animation (otherwise charts will throw exceptions)
         configuration.options = configuration.options || {};

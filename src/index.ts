@@ -24,6 +24,8 @@ export type ChartCallback = (chartJS: typeof ChartJS) => void | Promise<void>;
 export type CanvasType = 'pdf' | 'svg';
 export type MimeType = 'image/png' | 'image/jpeg';
 
+
+
 // https://github.com/Automattic/node-canvas#non-standard-apis
 type Canvas	= HTMLCanvasElement & {
 	toBuffer(callback: (err: Error|null, result: Buffer) => void, mimeType?: string, config?: any): void;
@@ -93,49 +95,6 @@ export class ChartJSNodeCanvas {
 		this._chartJs = this.initialize(options);
 	}
 
-	/**
-	 * Render to a data url.
-	 * @see https://github.com/Automattic/node-canvas#canvastodataurl
-	 *
-	 * @param configuration The Chart JS configuration for the chart to render.
-	 * @param mimeType The image format, `image/png` or `image/jpeg`.
-	 */
-	public renderToDataURL(configuration: ChartConfiguration, mimeType: MimeType = 'image/png'): Promise<string> {
-
-		const chart = this.renderChart(configuration);
-		return new Promise<string>((resolve, reject) => {
-			if (!chart.canvas) {
-				return reject(new Error('Canvas is null'));
-			}
-			const canvas = chart.canvas as Canvas;
-			canvas.toDataURL(mimeType, (error: Error | null, png: string) => {
-				chart.destroy();
-				if (error) {
-					return reject(error);
-				}
-				return resolve(png);
-			});
-		});
-	}
-
-	/**
-	 * Render to a data url synchronously.
-	 * @see https://github.com/Automattic/node-canvas#canvastodataurl
-	 *
-	 * @param configuration The Chart JS configuration for the chart to render.
-	 * @param mimeType The image format, `image/png` or `image/jpeg`.
-	 */
-	public renderToDataURLSync(configuration: ChartConfiguration, mimeType: MimeType = 'image/png'): string {
-
-		const chart = this.renderChart(configuration);
-		if (!chart.canvas) {
-			throw new Error('Canvas is null');
-		}
-		const canvas = chart.canvas as Canvas;
-		const dataUrl = canvas.toDataURL(mimeType);
-		chart.destroy();
-		return dataUrl;
-	}
 
 	/**
 	 * Render to a buffer.
@@ -145,7 +104,6 @@ export class ChartJSNodeCanvas {
 	 * @param mimeType A string indicating the image format. Valid options are `image/png`, `image/jpeg` (if node-canvas was built with JPEG support) or `raw` (unencoded ARGB32 data in native-endian byte order, top-to-bottom). Defaults to `image/png` for image canvases, or the corresponding type for PDF or SVG canvas.
 	 */
 	public renderToBuffer(configuration: ChartConfiguration): Promise<Buffer> {
-
 		const chart = this.renderChart(configuration);
 		return (chart.canvas as any as SkiaCanvas).toBuffer('png')
 	}
@@ -190,6 +148,11 @@ export class ChartJSNodeCanvas {
 
 	private renderChart(configuration: ChartConfiguration): ChartJS {
 		const canvas = new SkiaCanvas(this._width, this._height);
+		const ctx = canvas.getContext('2d');
+			ctx.save();
+		ctx.fillStyle = '#fff'
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.restore();
 		(canvas as any).style = (canvas as any).style || {};
 		// Disable animation (otherwise charts will throw exceptions)
 		configuration.options = configuration.options || {};

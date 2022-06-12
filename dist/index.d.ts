@@ -60,22 +60,6 @@ export declare class ChartJSNodeCanvas {
      */
     constructor(options: ChartJSNodeCanvasOptions);
     /**
-     * Render to a data url.
-     * @see https://github.com/Automattic/node-canvas#canvastodataurl
-     *
-     * @param configuration The Chart JS configuration for the chart to render.
-     * @param mimeType The image format, `image/png` or `image/jpeg`.
-     */
-    renderToDataURL(configuration: ChartConfiguration, mimeType?: MimeType): Promise<string>;
-    /**
-     * Render to a data url synchronously.
-     * @see https://github.com/Automattic/node-canvas#canvastodataurl
-     *
-     * @param configuration The Chart JS configuration for the chart to render.
-     * @param mimeType The image format, `image/png` or `image/jpeg`.
-     */
-    renderToDataURLSync(configuration: ChartConfiguration, mimeType?: MimeType): string;
-    /**
      * Render to a buffer.
      * @see https://github.com/Automattic/node-canvas#canvastobuffer
      *
