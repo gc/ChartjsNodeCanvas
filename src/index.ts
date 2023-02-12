@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { Chart as ChartJS, ChartConfiguration, ChartComponentLike, Plugin } from 'chart.js';
-import { Canvas as SkiaCanvas, FontLibrary, Image } from 'skia-canvas/lib';
+import { Canvas as NAPICanvas, GlobalFonts, Image } from '@napi-rs/canvas';
 
 export type ChartJSNodeCanvasPlugins = {
 	/**
@@ -122,7 +122,7 @@ export class ChartJSNodeCanvas {
 	 */
 	public renderToBuffer(configuration: ChartConfiguration): Promise<Buffer> {
 		const chart = this.renderChart(configuration);
-		return (chart.canvas as any as SkiaCanvas).toBuffer('png')
+		return (chart.canvas as any as NAPICanvas).encode('png')
 	}
 
 	/**
@@ -135,7 +135,7 @@ export class ChartJSNodeCanvas {
 	public renderToBufferSync(configuration: ChartConfiguration): Buffer {
 
 		const chart = this.renderChart(configuration);
-		return (chart.canvas as any as SkiaCanvas).toBufferSync('png')
+		return (chart.canvas as any as NAPICanvas).toBuffer('image/png')
 	}
 
 	/**
@@ -147,7 +147,7 @@ export class ChartJSNodeCanvas {
 	 * registerFont('comicsans.ttf', { family: 'Comic Sans' });
 	 */
 	public registerFont(path: string, options: { readonly family: string, readonly weight?: string, readonly style?: string }): void {
-		FontLibrary.use(options.family, [path])
+		GlobalFonts.registerFromPath(path, options.family);
 	}
 
 	private initialize(options: ChartJSNodeCanvasOptions): typeof ChartJS {
@@ -165,7 +165,7 @@ export class ChartJSNodeCanvas {
 	}
 
 	private renderChart(configuration: ChartConfiguration): ChartJS {
-		const canvas = new SkiaCanvas(this._width, this._height);
+		const canvas = new NAPICanvas(this._width, this._height);
 		(canvas as any).style = (canvas as any).style || {};
 		// Disable animation (otherwise charts will throw exceptions)
 		configuration.options = configuration.options || {};
