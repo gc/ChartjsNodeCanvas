@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChartJSNodeCanvas = exports.BackgroundColourPlugin = void 0;
-const lib_1 = require("skia-canvas/lib");
+const canvas_1 = require("@napi-rs/canvas");
 class BackgroundColourPlugin {
     constructor(_width, _height, _fillStyle) {
         this._width = _width;
@@ -36,7 +36,7 @@ class ChartJSNodeCanvas {
         }
         this._width = options.width;
         this._height = options.height;
-        this._image = lib_1.Image;
+        this._image = canvas_1.Image;
         this._type = options.type && options.type.toLowerCase();
         this._chartJs = this.initialize(options);
     }
@@ -49,7 +49,7 @@ class ChartJSNodeCanvas {
      */
     renderToBuffer(configuration) {
         const chart = this.renderChart(configuration);
-        return chart.canvas.toBuffer('png');
+        return chart.canvas.encode('png');
     }
     /**
      * Render to a buffer synchronously.
@@ -60,7 +60,7 @@ class ChartJSNodeCanvas {
      */
     renderToBufferSync(configuration) {
         const chart = this.renderChart(configuration);
-        return chart.canvas.toBufferSync('png');
+        return chart.canvas.toBuffer('image/png');
     }
     /**
      * Use to register the font with Canvas to use a font file that is not installed as a system font, this must be done before the Canvas is created.
@@ -71,7 +71,7 @@ class ChartJSNodeCanvas {
      * registerFont('comicsans.ttf', { family: 'Comic Sans' });
      */
     registerFont(path, options) {
-        lib_1.FontLibrary.use(options.family, [path]);
+        canvas_1.GlobalFonts.registerFromPath(path, options.family);
     }
     initialize(options) {
         const chartJs = require('chart.js');
@@ -83,7 +83,7 @@ class ChartJSNodeCanvas {
         return chartJs;
     }
     renderChart(configuration) {
-        const canvas = new lib_1.Canvas(this._width, this._height);
+        const canvas = new canvas_1.Canvas(this._width, this._height);
         canvas.style = canvas.style || {};
         // Disable animation (otherwise charts will throw exceptions)
         configuration.options = configuration.options || {};
